@@ -179,7 +179,27 @@ def collect_literature_items(folder: Path) -> list[LiteratureItem]:
 
 
 def render_html(items: list[LiteratureItem], source_dir: Path) -> str:
-    data_json = html.escape(json.dumps([asdict(item) for item in items], ensure_ascii=False))
+    data_json = json.dumps([asdict(item) for item in items], ensure_ascii=False).replace("</", "<\\/")
+    initial_rows = "\n".join(
+        f"""
+        <tr>
+          <td>{idx + 1}</td>
+          <td class=\"wrap\">{html.escape(item.title)}</td>
+          <td>{html.escape(item.authors)}</td>
+          <td>{html.escape(item.year)}</td>
+          <td>{html.escape(item.file_type)}</td>
+          <td>{html.escape(item.size_kb)}</td>
+          <td>{html.escape(item.modified_time)}</td>
+          <td class=\"wrap\">{html.escape(item.objective)}</td>
+          <td class=\"wrap\">{html.escape(item.keywords)}</td>
+          <td class=\"wrap\">{html.escape(item.methods)}</td>
+          <td class=\"wrap\">{html.escape(item.results_conclusion)}</td>
+          <td class=\"wrap\">{html.escape(item.innovation_limitations)}</td>
+          <td title=\"{html.escape(item.absolute_path)}\">{html.escape(item.file_name)}</td>
+        </tr>
+        """
+        for idx, item in enumerate(items)
+    )
 
     return f"""<!DOCTYPE html>
 <html lang=\"zh-CN\">
@@ -240,12 +260,13 @@ def render_html(items: list[LiteratureItem], source_dir: Path) -> str:
           <th><input data-filter=\"file_name\" placeholder=\"筛选文件名\" /></th>
         </tr>
       </thead>
-      <tbody></tbody>
+      <tbody>{initial_rows}</tbody>
     </table>
   </div>
 
+<script id="literature-data" type="application/json">{data_json}</script>
 <script>
-const data = JSON.parse(`{data_json}`);
+const data = JSON.parse(document.getElementById('literature-data').textContent);
 const tbody = document.querySelector('#literatureTable tbody');
 const globalSearch = document.getElementById('globalSearch');
 const countNode = document.getElementById('count');
@@ -331,11 +352,11 @@ def scan_and_render(source_dir: Path, output_file: Path) -> int:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="监控文献目录并生成动态交互表格")
+    parser = argparse.ArgumentParser(description="扫描文献目录并生成动态交互表格")
     parser.add_argument("source_dir", type=Path, help="文献文件夹路径")
     parser.add_argument("--output", type=Path, default=Path("output/literature_table.html"), help="输出 HTML 文件")
-    parser.add_argument("--interval", type=int, default=30, help="轮询间隔（秒）")
-    parser.add_argument("--once", action="store_true", help="仅扫描一次并退出")
+    parser.add_argument("--watch", action="store_true", help="持续监控目录变化（默认关闭，手动扫描一次）")
+    parser.add_argument("--interval", type=int, default=30, help="监控模式下的轮询间隔（秒）")
     return parser.parse_args()
 
 
@@ -347,15 +368,23 @@ def main() -> None:
     if not source_dir.exists() or not source_dir.is_dir():
         raise SystemExit(f"目录不存在或不是文件夹: {source_dir}")
 
-    print(f"开始监控目录: {source_dir.resolve()}")
+    print(f"扫描目录: {source_dir.resolve()}")
     print(f"输出文件: {output_file.resolve()}")
 
+    watch_enabled = getattr(args, "watch", False)
+
+    if not watch_enabled:
+        total = scan_and_render(source_dir, output_file)
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] 手动扫描完成，文献数: {total}")
+        return
+
     previous_snapshot: dict[str, float] = {}
+    first_scan = True
 
     while True:
         current_snapshot = {str(path): path.stat().st_mtime for path in _iter_files(source_dir)}
 
-        should_render = current_snapshot != previous_snapshot or (args.once and not previous_snapshot)
+        should_render = first_scan or current_snapshot != previous_snapshot
 
         if should_render:
             total = scan_and_render(source_dir, output_file)
@@ -364,8 +393,7 @@ def main() -> None:
         else:
             print(f"[{datetime.now().strftime('%H:%M:%S')}] 无变化")
 
-        if args.once:
-            break
+        first_scan = False
         time.sleep(args.interval)
 
 
