@@ -1,4 +1,4 @@
-# literature-manager（ymeng）
+# literature-manager（prd）
 
 一个轻量级文献管理原型工具：
 - 定期扫描文献目录（支持 PDF/BIB/TXT/MD/DOC/DOCX）。
