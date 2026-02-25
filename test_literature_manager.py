@@ -1,8 +1,6 @@
 import subprocess
 import tempfile
 import unittest
-from types import SimpleNamespace
-from unittest import mock
 from pathlib import Path
 
 import literature_manager as lm
@@ -70,18 +68,6 @@ class LiteratureManagerTests(unittest.TestCase):
             completed = subprocess.run(cmd, capture_output=True, text=True, check=True)
             self.assertTrue(out.exists())
             self.assertIn("手动扫描完成", completed.stdout)
-
-    def test_main_works_without_watch_attribute_for_backward_compat(self):
-        with tempfile.TemporaryDirectory() as td:
-            root = Path(td)
-            out = root / "manual.html"
-            fake_args = SimpleNamespace(source_dir=root, output=out)
-
-            with mock.patch("literature_manager.parse_args", return_value=fake_args), \
-                mock.patch("literature_manager.scan_and_render", return_value=0) as scan_mock:
-                lm.main()
-
-            scan_mock.assert_called_once_with(root, out)
 
 
 if __name__ == "__main__":

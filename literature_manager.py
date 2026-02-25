@@ -331,11 +331,11 @@ def scan_and_render(source_dir: Path, output_file: Path) -> int:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="扫描文献目录并生成动态交互表格")
+    parser = argparse.ArgumentParser(description="监控文献目录并生成动态交互表格")
     parser.add_argument("source_dir", type=Path, help="文献文件夹路径")
     parser.add_argument("--output", type=Path, default=Path("output/literature_table.html"), help="输出 HTML 文件")
-    parser.add_argument("--watch", action="store_true", help="持续监控目录变化（默认关闭，手动扫描一次）")
-    parser.add_argument("--interval", type=int, default=30, help="监控模式下的轮询间隔（秒）")
+    parser.add_argument("--interval", type=int, default=30, help="轮询间隔（秒）")
+    parser.add_argument("--once", action="store_true", help="仅扫描一次并退出")
     return parser.parse_args()
 
 
@@ -347,23 +347,15 @@ def main() -> None:
     if not source_dir.exists() or not source_dir.is_dir():
         raise SystemExit(f"目录不存在或不是文件夹: {source_dir}")
 
-    print(f"扫描目录: {source_dir.resolve()}")
+    print(f"开始监控目录: {source_dir.resolve()}")
     print(f"输出文件: {output_file.resolve()}")
 
-    watch_enabled = getattr(args, "watch", False)
-
-    if not watch_enabled:
-        total = scan_and_render(source_dir, output_file)
-        print(f"[{datetime.now().strftime('%H:%M:%S')}] 手动扫描完成，文献数: {total}")
-        return
-
     previous_snapshot: dict[str, float] = {}
-    first_scan = True
 
     while True:
         current_snapshot = {str(path): path.stat().st_mtime for path in _iter_files(source_dir)}
 
-        should_render = first_scan or current_snapshot != previous_snapshot
+        should_render = current_snapshot != previous_snapshot or (args.once and not previous_snapshot)
 
         if should_render:
             total = scan_and_render(source_dir, output_file)
@@ -372,7 +364,8 @@ def main() -> None:
         else:
             print(f"[{datetime.now().strftime('%H:%M:%S')}] 无变化")
 
-        first_scan = False
+        if args.once:
+            break
         time.sleep(args.interval)
 
 
