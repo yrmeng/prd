@@ -355,7 +355,9 @@ def main() -> None:
     while True:
         current_snapshot = {str(path): path.stat().st_mtime for path in _iter_files(source_dir)}
 
-        if current_snapshot != previous_snapshot:
+        should_render = current_snapshot != previous_snapshot or (args.once and not previous_snapshot)
+
+        if should_render:
             total = scan_and_render(source_dir, output_file)
             print(f"[{datetime.now().strftime('%H:%M:%S')}] 已更新表格，文献数: {total}")
             previous_snapshot = current_snapshot

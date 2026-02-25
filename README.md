@@ -40,6 +40,44 @@ literature-manager /path/to/your/papers \
 literature-manager /path/to/your/papers --once
 ```
 
+## Windows 一键安装（EXE 安装包）
+
+可以。项目已提供 Windows 打包脚本与安装器脚本：
+- `scripts/windows/build_windows_exe.ps1`（用 PyInstaller 生成 exe）
+- `scripts/windows/literature-manager.iss`（用 Inno Setup 生成一键安装包）
+
+### 在 Windows 上构建步骤
+
+1. 安装依赖：
+   - Python 3.9+
+   - Inno Setup 6（安装后包含 `ISCC.exe`）
+
+2. 在 PowerShell 进入项目目录后执行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\windows\build_windows_exe.ps1
+```
+
+产物目录：
+
+```text
+dist\literature-manager\literature-manager.exe
+```
+
+3. 生成一键安装程序（Setup.exe）：
+
+```powershell
+& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" .\scripts\windows\literature-manager.iss
+```
+
+安装包输出：
+
+```text
+dist\literature-manager-setup-0.1.0.exe
+```
+
+用户双击该安装包即可完成安装（可选桌面快捷方式）。
+
 ## 交互能力
 
 1. 点击表头进行升序/降序排序。
