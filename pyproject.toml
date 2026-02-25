@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "literature-manager"
+version = "0.1.0"
+description = "Monitor a literature folder and generate an interactive HTML table."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+  { name = "ymeng" }
+]
+keywords = ["literature", "bibliography", "html", "watcher"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Topic :: Text Processing",
+]
+
+[project.scripts]
+literature-manager = "literature_manager:main"
+
+[tool.setuptools]
+py-modules = ["literature_manager"]
