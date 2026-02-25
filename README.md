@@ -1,3 +1,7 @@
+# literature-manager（ymeng）
+
+一个轻量级文献管理原型工具：
+- 手动扫描文献目录（支持 PDF/BIB/TXT/MD/DOC/DOCX），并可选开启持续监控。
 # literature-manager（prd）
 
 一个轻量级文献管理原型工具：
@@ -13,6 +17,8 @@
 python3 literature_manager.py /path/to/your/papers
 ```
 
+默认即手动扫描一次并退出。
+
 ### 方式 2：安装为命令行工具（推荐发布后使用）
 
 ```bash
@@ -20,12 +26,51 @@ pip install .
 literature-manager /path/to/your/papers
 ```
 
+默认输出到：
 默认持续监控目录，每 30 秒检查一次，输出到：
 
 ```text
 output/literature_table.html
 ```
 
+### 监控模式（可选）
+
+```bash
+literature-manager /path/to/your/papers --watch --interval 60
+```
+
+### 指定输出路径
+
+```bash
+literature-manager /path/to/your/papers --output output/my_table.html
+```
+
+## 从 GitHub 直接安装（本地用户最方便）
+
+如果你已经把仓库发布到 GitHub，用户可以不下载源码，直接安装：
+
+### HTTPS 安装
+
+```bash
+pip install "git+https://github.com/<你的GitHub用户名>/<你的仓库名>.git"
+```
+
+### 指定分支/标签安装（推荐发布版本时使用 tag）
+
+```bash
+pip install "git+https://github.com/<你的GitHub用户名>/<你的仓库名>.git@v0.1.0"
+```
+
+### SSH 安装（适合私有仓库或已配置 SSH Key）
+
+```bash
+pip install "git+ssh://git@github.com/<你的GitHub用户名>/<你的仓库名>.git"
+```
+
+安装后可直接运行：
+
+```bash
+literature-manager /path/to/your/papers
 可选参数：
 
 ```bash
