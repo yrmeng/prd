@@ -2,6 +2,10 @@
 
 一个轻量级文献管理原型工具：
 - 手动扫描文献目录（支持 PDF/BIB/TXT/MD/DOC/DOCX），并可选开启持续监控。
+# literature-manager（prd）
+
+一个轻量级文献管理原型工具：
+- 定期扫描文献目录（支持 PDF/BIB/TXT/MD/DOC/DOCX）。
 - 自动生成可搜索、可排序、可按列筛选的动态 HTML 表格。
 - 附带内容摘要列，便于快速建立阅读笔记视图。
 
@@ -23,6 +27,7 @@ literature-manager /path/to/your/papers
 ```
 
 默认输出到：
+默认持续监控目录，每 30 秒检查一次，输出到：
 
 ```text
 output/literature_table.html
@@ -66,6 +71,18 @@ pip install "git+ssh://git@github.com/<你的GitHub用户名>/<你的仓库名>.
 
 ```bash
 literature-manager /path/to/your/papers
+可选参数：
+
+```bash
+literature-manager /path/to/your/papers \
+  --output output/my_table.html \
+  --interval 60
+```
+
+只扫描一次：
+
+```bash
+literature-manager /path/to/your/papers --once
 ```
 
 ## Windows 一键安装（EXE 安装包）
